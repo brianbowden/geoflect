@@ -5,9 +5,10 @@ var GeoEntitySchema = new Schema({
   guid: String,
   loc: { "type": {type: String} , "coordinates": Array },
   entityType: String,
-  title: String,
-  description: String,
-  imageUrl: String,
+  entityTypeId: Number,
+  label: String,
+  data: String,
+  url: String,
   lastModified: Date
 });
 
