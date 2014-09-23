@@ -128,8 +128,10 @@ var syncAllData = function() {
   syncData(TDOT_PATH_MEMPHIS_SPEED);
 }
 
-// remove this after testing!!!!!!!!!!!!!!!!!!!!!!!
-syncAllData();
+if (require.main === module) {
+  // Command line
+  syncAllData();
+}
 
 module.exports = {
   'syncData': syncData,
