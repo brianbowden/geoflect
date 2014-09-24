@@ -1,5 +1,6 @@
+var _ = require('underscore');
 var mongoose = require('mongoose');
-var GeoEntity = require('./models/geo_entity');
+var GeoEntity = require('../models/geo_entity');
 var Moment = require('moment');
 var http = require('http');
 var xml2js = require('xml2js'),
@@ -17,9 +18,9 @@ const TDOT_PATH_NASH_SPEED = { id: 6, name: 'Nashville Average Speed', path: '/t
 const TDOT_PATH_KNOX_SPEED = { id: 7, name: 'Knoxville Average Speed', path: '/tsw/GeoRSS/TDOTKnoxSpeedGeorss.xml', type: 'rss2' };
 const TDOT_PATH_MEMPHIS_SPEED = { id: 8, name: 'Memphis Average Speed', path: '/tsw/GeoRSS/TDOTMempSpeedGeorss.xml', type: 'rss2' };
 
-mongoose.connect('mongodb://localhost/geoflect');
+mongoose.connect(process.env.MONGO_DB);
 
-var syncData = function(entitySource) {
+var syncData = function(entitySource, currTime, callback) {
 
   var httpOptions = {
     host: TDOT_HOST,
@@ -28,6 +29,11 @@ var syncData = function(entitySource) {
   };
 
   var xml = '';
+
+  var entityArray = [];
+  var geoEntities = [];
+  var updateCount = 0;
+  var failedInsertCount = 0;
 
   http.get(httpOptions, function(res) {
     res.setEncoding('utf8');
@@ -40,17 +46,16 @@ var syncData = function(entitySource) {
       parser.parseString(xml, function (err, data) {
         if (!err) {
 
-          var currTime = new Moment().format();
-
-          var entityArray;
-
           if (entitySource.type === 'atom') {
             entityArray = data.feed.entry;
           } else if (entitySource.type === 'rss2') {
             entityArray = data.rss.channel[0].item;
           }
 
-          if (!!!entityArray) return;
+          if (!!!entityArray) {
+            callback({});
+            return;
+          }
 
           for (var i = 0; i < entityArray.length; i++) {
             var entity = entityArray[i];
@@ -77,7 +82,7 @@ var syncData = function(entitySource) {
                 loc: { 'type': 'Point', 'coordinates': [lat, lng]},
                 label: entity.title[0],
                 entityType: entitySource.name,
-                entityTypeId: entitySource.id,s
+                entityTypeId: entitySource.id,
                 lastModified: currTime
               };
 
@@ -93,17 +98,24 @@ var syncData = function(entitySource) {
               geoEntity.data = entity.AverageSpeed;
             }
 
-            console.dir(geoEntity);
-
-            GeoEntity.update({ id: geoEntity.guid }, geoEntity, { upsert: true }, function (err) {
+            GeoEntity.findOneAndUpdate({ id: geoEntity.guid }, geoEntity, { upsert: true }, function (err, geoDoc) {
               if (err) {
                 console.error(err);
+                failedInsertCount++;
+              } else {
+                geoEntities.push(geoDoc);
               }
-            })
+
+              if (geoEntities.length + failedInsertCount === entityArray.length) {
+                // This is probably a poor check that doesn't account for individual insertion/update errors
+                callback(geoEntities, err);
+              }
+            });
           }
 
         } else {
           console.error(err);
+          callback(null, err);
         }
       });
 
@@ -111,26 +123,69 @@ var syncData = function(entitySource) {
 
   }).on('error', function (err) {
     console.error(err);
-
+    callback(null, err);
   });
 }
 
-var syncAllData = function() {
-  syncData(TDOT_PATH_CAMERAS);
-  syncData(TDOT_PATH_MESSAGES);
-  syncData(TDOT_PATH_INCIDENTS);
-  syncData(TDOT_PATH_CONSTRUCTION);
-  syncData(TDOT_PATH_ROAD_CONDITIONS);
-  syncData(TDOT_PATH_COUNTYWIDE_WEATHER);
-  // This speed geo data contains lines, not points. Fix it later.
-  syncData(TDOT_PATH_NASH_SPEED);
-  syncData(TDOT_PATH_KNOX_SPEED);
-  syncData(TDOT_PATH_MEMPHIS_SPEED);
+function syncSourceList(sources, callback, currTime, current, totalEntities) {
+  if (!_.isNumber(current)) {
+    current = 0;
+  }
+
+  if (!totalEntities) {
+    totalEntities = [];
+  }
+
+  syncData(sources[current], currTime, function(geoEnts, err) {
+    if (err) {
+      console.error(err);
+    } else if (geoEnts) {
+      _.each(geoEnts, function(ent) {
+        totalEntities.push(ent);
+      });
+    }
+
+    debugger;
+
+    current++;
+    if (current < sources.length) {
+      syncSourceList(sources, callback, currTime, current, totalEntities);
+    } else {
+      callback(totalEntities, currTime);
+      return;
+    }
+  });
 }
 
+var syncAllData = function(callback) {
+  var sources = [
+    TDOT_PATH_CAMERAS,
+    TDOT_PATH_MESSAGES,
+    TDOT_PATH_INCIDENTS,
+    TDOT_PATH_CONSTRUCTION,
+    TDOT_PATH_ROAD_CONDITIONS,
+    TDOT_PATH_COUNTYWIDE_WEATHER,
+    TDOT_PATH_NASH_SPEED,
+    TDOT_PATH_KNOX_SPEED,
+    TDOT_PATH_MEMPHIS_SPEED
+  ];
+
+  var currTime = new Moment().format();
+
+  syncSourceList(sources, function (totalEntities, currTime) {
+    GeoEntity.remove({ lastModified: { $lt: currTime } }, 
+      function (err) {
+        callback(totalEntities);
+      })
+  }, currTime);
+}
 if (require.main === module) {
   // Command line
-  syncAllData();
+  syncAllData(function(totalEntities) {
+    _.each(totalEntities, function(entity) {
+      console.dir(entity);
+    });
+  });
 }
 
 module.exports = {

@@ -1,0 +1,11 @@
+Ideas for Camera Data:
+
+- Run ImageMagick filters to adjust brightness, contrast, and "blendability". Hopefully it's possible to overlay and not multiply.
+- Create blended traffic overlays for each camera for a each (half-hour?) time slot to determine when the best time is to leave
+- Create camera compositions that span the last 7 days and the last 7 Thursdays, for instance
+- Use incident/construction history to provide context for image stories (yep, that's what we're calling them)
+- Provide ability to remove days with irregular incidents
+
+Hard Problems:
+
+- Determine when you should leave for work to get home the fastest. This may involve blending in Google Maps data.
