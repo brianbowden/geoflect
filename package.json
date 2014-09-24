@@ -1,9 +1,15 @@
 {
   "name": "geoflect",
   "version": "0.0.1",
+  "description": "A fast, queryable JSON mirror for GeoRSS data".
+  "main": "./bin/www",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brianbowden/geoflect.git"
   },
   "dependencies": {
     "express": "~4.2.0",
@@ -17,5 +23,9 @@
     "mongoose": "~3.8.16",
     "moment": "~2.8.3",
     "xml2js": "~0.4.4"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-shipit": "^0.3.4"
   }
 }
