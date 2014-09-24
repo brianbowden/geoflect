@@ -5,13 +5,13 @@ module.exports = function (grunt) {
     shipit: {
       options: {
         workspace: '/tmp/geoflect-workspace',
-        deployTo: '/home/geoflect/production',
+        deployTo: '/usr/src/geoflect',
         repositoryUrl: pkg.repository.url,
         ignores: ['.git', 'node_modules'],
         keepReleases: 3
       },
       production: {
-        servers: ['geoflect.com']
+        servers: ['geoflect@geoflect.com']
       }
     }
   });

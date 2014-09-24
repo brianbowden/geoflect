@@ -1,7 +1,7 @@
 {
   "name": "geoflect",
   "version": "0.0.1",
-  "description": "A fast, queryable JSON mirror for GeoRSS data".
+  "description": "A fast, queryable JSON mirror for GeoRSS data",
   "main": "./bin/www",
   "private": true,
   "scripts": {
