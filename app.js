@@ -12,6 +12,7 @@ var apiRoutes = require('./routes/api');
 
 var app = express();
 
+
 loggly.log("Starting Geoflect server", "serverstart");
 
 // view engine setup
@@ -61,5 +62,12 @@ app.use(function(err, req, res, next) {
     });
 });
 
+if (require.main === module) {
+    app.set('port', process.env.GEOFLECT_PORT || 3000);
+
+    var server = app.listen(app.get('port'), function() {
+      console.log('Express server listening on port ' + server.address().port);
+    });
+}
 
 module.exports = app;
