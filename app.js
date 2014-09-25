@@ -5,14 +5,14 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var taskScheduler = require('./utilities/task_scheduler');
-var logger = require('./utilities/logger');
+var loggly = require('./utilities/logger');
 
 
 var apiRoutes = require('./routes/api');
 
 var app = express();
 
-logger.log("Starting Geoflect server");
+loggly.log("Starting Geoflect server", "serverstart");
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

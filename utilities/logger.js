@@ -6,14 +6,14 @@ var client = loggly.createClient({
     username: 'bicx',
     password: process.env.LOGGLY_PS
   },
-  tags: ["NodeJS"],
+  tags: ["geoflect"],
   json: true
 });
 
 var log = function(logEntry, tag) {
   debugger;
-  client.log(logEntry, tag);
-  console.log(logEntry, tag);
+  client.log(logEntry, [tag]);
+  console.log(logEntry);
 };
 
 if (require.main === module) {
