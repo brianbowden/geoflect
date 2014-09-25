@@ -4,7 +4,7 @@ var client = loggly.createClient({
   subdomain: 'elemyntic',
   auth:  {
     username: 'bicx',
-    password: process.env.LOGGLY_PS
+    password: process.env.GEOFLECT_LOGGLY_PS
   },
   tags: ["geoflect"],
   json: true

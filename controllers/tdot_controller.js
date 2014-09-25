@@ -19,7 +19,7 @@ const TDOT_PATH_NASH_SPEED = { id: 6, name: 'Nashville Average Speed', path: '/t
 const TDOT_PATH_KNOX_SPEED = { id: 7, name: 'Knoxville Average Speed', path: '/tsw/GeoRSS/TDOTKnoxSpeedGeorss.xml', type: 'rss2' };
 const TDOT_PATH_MEMPHIS_SPEED = { id: 8, name: 'Memphis Average Speed', path: '/tsw/GeoRSS/TDOTMempSpeedGeorss.xml', type: 'rss2' };
 
-mongoose.connect(process.env.MONGO_DB);
+mongoose.connect(process.env.GEOFLECT_MONGO_DB);
 
 function syncData(entitySource, currTime, callback) {
 
