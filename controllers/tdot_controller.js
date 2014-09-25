@@ -232,13 +232,15 @@ if (require.main === module) {
 
 var getGeoEntities = function(geoJson, mileRadius, queryParams, callback) {
 
+  var query = {};
+
   if (!isNaN(queryParams.typeId)) {
-    queryParams.entityTypeId = Number(queryParams.typeId);
+    query.entityTypeId = Number(queryParams.typeId);
   }
 
   GeoEntity.geoNear(
     geoJson,
-    { maxDistance: mileRadius / 3961.3, 'query': queryParams, lean: true, spherical: true},
+    { maxDistance: mileRadius / 3961.3, 'query': query, lean: true, spherical: true},
     function (err, data) {
       if (err) {
         console.error(err);
