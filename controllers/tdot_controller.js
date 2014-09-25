@@ -9,11 +9,11 @@ var xml2js = require('xml2js'),
 
 /** TDOT GeoRSS host/paths **/
 const TDOT_HOST = 'ww2.tdot.state.tn.us';
-const TDOT_PATH_CAMERAS = { id: 0, name: 'Cameras', path: '/tsw/GeoRSS/TDOTCameraGeorss.xml', type: 'atom' };
-const TDOT_PATH_MESSAGES = { id: 1, name: 'Message Signs', path: '/tsw/GeoRSS/TDOTMessageGeorss.xml', type: 'atom' };
-const TDOT_PATH_INCIDENTS = { id: 2, name: 'Incidents', path: '/tsw/GeoRSS/TDOTIncidentGeoRSS.xml', type: 'rss2' };
+const TDOT_PATH_CAMERAS = { id: 0, name: 'Camera', path: '/tsw/GeoRSS/TDOTCameraGeorss.xml', type: 'atom' };
+const TDOT_PATH_MESSAGES = { id: 1, name: 'Message Sign', path: '/tsw/GeoRSS/TDOTMessageGeorss.xml', type: 'atom' };
+const TDOT_PATH_INCIDENTS = { id: 2, name: 'Incident', path: '/tsw/GeoRSS/TDOTIncidentGeoRSS.xml', type: 'rss2' };
 const TDOT_PATH_CONSTRUCTION = { id: 3, name: 'Construction', path: '/tsw/GeoRSS/TDOTConstructionGeorss.xml', type: 'rss2' };
-const TDOT_PATH_ROAD_CONDITIONS = { id: 4, name: 'Road Conditions', path: '/tsw/GeoRSS/TDOTWeatherGeorss.xml', type: 'rss2' };
+const TDOT_PATH_ROAD_CONDITIONS = { id: 4, name: 'Road Condition', path: '/tsw/GeoRSS/TDOTWeatherGeorss.xml', type: 'rss2' };
 const TDOT_PATH_COUNTYWIDE_WEATHER = { id: 5, name: 'Countywide Weather Advisory', path: '/tsw/GeoRSS/TDOTCWAGeorss.xml', type: 'rss2' };
 const TDOT_PATH_NASH_SPEED = { id: 6, name: 'Nashville Average Speed', path: '/tsw/GeoRSS/TDOTNashSpeedGeorss.xml', type: 'rss2' };
 const TDOT_PATH_KNOX_SPEED = { id: 7, name: 'Knoxville Average Speed', path: '/tsw/GeoRSS/TDOTKnoxSpeedGeorss.xml', type: 'rss2' };
