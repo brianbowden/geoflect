@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+
+var tdotController = require('../controllers/tdot_controller');
+
+tdotController.syncEventData(function(totalEntities) {
+  if (totalEntities) {
+    process.exit();
+  }
+});

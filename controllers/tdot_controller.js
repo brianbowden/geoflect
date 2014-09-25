@@ -1,6 +1,7 @@
 var _ = require('underscore');
 var mongoose = require('mongoose');
 var GeoEntity = require('../models/geo_entity');
+var logger = require('../utilities/logger');
 var Moment = require('moment');
 var http = require('http');
 var xml2js = require('xml2js'),
@@ -20,7 +21,7 @@ const TDOT_PATH_MEMPHIS_SPEED = { id: 8, name: 'Memphis Average Speed', path: '/
 
 mongoose.connect(process.env.MONGO_DB);
 
-var syncData = function(entitySource, currTime, callback) {
+function syncData(entitySource, currTime, callback) {
 
   var httpOptions = {
     host: TDOT_HOST,
@@ -157,6 +158,26 @@ function syncSourceList(sources, callback, currTime, current, totalEntities) {
   });
 }
 
+var syncMultiData = function(sources, callback) {
+
+  var currTime = new Moment().format();
+
+  syncSourceList(sources, function (totalEntities, currTime) {
+
+    var typeIdQuery = [];
+
+    _.each(sources, function (source) {
+      typeIdQuery.push({'entityTypeId': source.entityTypeId});
+    });
+
+    GeoEntity.remove({ lastModified: { $lt: currTime }, entityTypeId: { $or: typeIdQuery } }, 
+      function (err) {
+        callback(totalEntities);
+      });
+
+  }, currTime);
+}
+
 var syncAllData = function(callback) {
   var sources = [
     TDOT_PATH_CAMERAS,
@@ -170,26 +191,47 @@ var syncAllData = function(callback) {
     TDOT_PATH_MEMPHIS_SPEED
   ];
 
-  var currTime = new Moment().format();
-
-  syncSourceList(sources, function (totalEntities, currTime) {
-    GeoEntity.remove({ lastModified: { $lt: currTime } }, 
-      function (err) {
-        callback(totalEntities);
-      })
-  }, currTime);
+  syncMultiData(sources, callback);
 }
+
+var syncEventData = function(callback) {
+  var sources = [
+    TDOT_PATH_INCIDENTS,
+    TDOT_PATH_CONSTRUCTION,
+    TDOT_PATH_ROAD_CONDITIONS,
+    TDOT_PATH_COUNTYWIDE_WEATHER,
+    TDOT_PATH_NASH_SPEED,
+    TDOT_PATH_KNOX_SPEED,
+    TDOT_PATH_MEMPHIS_SPEED
+  ];
+
+  syncMultiData(sources, function(totalEntities) {
+    logger.log("Updated " + totalEntities.length + " event records", "eventupdate");
+    callback(totalEntities);
+  });
+}
+
+var syncFixedPointData = function(callback) {
+  var sources = [
+    TDOT_PATH_CAMERAS,
+    TDOT_PATH_MESSAGES
+  ];
+
+  syncMultiData(sources, function(totalEntities) {
+    logger.log("Updated " + totalEntities.length + " fixed point records", "fixedpointupdate");
+    callback(totalEntities);
+  });
+}
+
 if (require.main === module) {
   // Command line
-  syncAllData(function(totalEntities) {
-    _.each(totalEntities, function(entity) {
-      console.dir(entity);
-    });
+  syncFixedPointData(function(totalEntities) {
+    console.log("Fixed Point Request Completed");
   });
 }
 
 module.exports = {
-  'syncData': syncData,
-  'syncAllData': syncAllData
+  'syncEventData': syncEventData,
+  'syncFixedPointData': syncFixedPointData
 }
 

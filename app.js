@@ -4,10 +4,15 @@ var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var taskScheduler = require('./utilities/task_scheduler');
+var logger = require('./utilities/logger');
+
 
 var apiRoutes = require('./routes/api');
 
 var app = express();
+
+logger.log("Starting Geoflect server");
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -21,6 +26,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api', apiRoutes);
+
+/// start scheduled tasks
+taskScheduler.startScheduledTasks();
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
