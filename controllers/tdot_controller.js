@@ -230,8 +230,52 @@ if (require.main === module) {
   });
 }
 
+var getGeoEntities = function(geoJson, mileRadius, queryParams, callback) {
+
+  if (!isNaN(queryParams.typeId)) {
+    queryParams.entityTypeId = Number(req.query.typeId);
+  }
+
+  GeoEntity.geoNear(
+    geoJson,
+    { maxDistance: mileRadius / 3961.3, 'query': queryParams, lean: true, spherical: true},
+    function (err, data) {
+      if (err) {
+        console.error(err);
+        callback({error: err});
+
+      } else {
+
+        var meta = {};
+        meta.returned_at = new Moment().format();
+        meta.query_geo_json = geoJson;
+        meta.query_mile_radius = mileRadius;
+        meta.query_params = queryParams;
+
+        var entities = [];
+
+        if (data && data.length > 0) {
+          _.each(data, function(result) {
+            entities.push({
+              'guid': result.obj.guid,
+              'label': result.obj.label,
+              'entity_type': result.obj.entityType,
+              'entity_type_id': result.obj.entityTypeId,
+              'url': result.obj.url,
+              'last_modified': result.obj.lastModified,
+              'location': result.obj.loc
+            });
+          });
+        }
+
+        callback({ 'meta': meta, 'geo_entities': entities });
+      }
+    });
+}
+
 module.exports = {
   'syncEventData': syncEventData,
-  'syncFixedPointData': syncFixedPointData
+  'syncFixedPointData': syncFixedPointData,
+  'getGeoEntities': getGeoEntities
 }
 

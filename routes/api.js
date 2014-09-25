@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
+var tdotController = require('../controllers/tdot_controller');
 var GeoEntity = require('../models/geo_entity');
 var Moment = require('moment');
 var _ = require('underscore');
@@ -9,51 +10,42 @@ var _ = require('underscore');
 
 router.get('/locations/chattanooga', function(req, res) {
     
-    var query = {};
-    var centerCoords = [-85.2386909, 35.0982955];
-    var radiusMiles = 5;
+    var geoJson = { type: 'Point', coordinates: [-85.2386909, 35.0982955] };
+    var mileRadius = 5;
 
-    debugger;
-    if (!isNaN(req.query.typeId)) {
-      query.entityTypeId = Number(req.query.typeId);
-      console.log("Adding query");
-    }
+    tdotController.getGeoEntities(geoJson, mileRadius, req.query, function(results) {
+      res.json(results);
+    });
+});
 
-    GeoEntity.geoNear(
-      { type: 'Point', coordinates: centerCoords },
-      { maxDistance: radiusMiles / 3961.3, 'query': query, lean: true, spherical: true},
-      function (err, data) {
-        if (err) {
-          console.error(err);
-          res.json({error: err});
+router.get('/locations/ridgecut', function(req, res) {
+    
+    var geoJson = { type: 'Point', coordinates: [-85.2680866, 35.0180184] };
+    var mileRadius = 0.5;
 
-        } else {
+    tdotController.getGeoEntities(geoJson, mileRadius, req.query, function(results) {
+      res.json(results);
+    });
+});
 
-          var meta = {};
-          meta.returned_at = new Moment().format();
-          meta.query_center_coordinates = centerCoords;
-          meta.query_mile_radius = radiusMiles;
-          meta.query_params = query;
+router.get('/locations/thebend', function(req, res) {
+    
+    var geoJson = { type: 'Point', coordinates: [-85.3514422, 35.0274214] };
+    var mileRadius = 2;
 
-          var entities = [];
+    tdotController.getGeoEntities(geoJson, mileRadius, req.query, function(results) {
+      res.json(results);
+    });
+});
 
-          if (data && data.length > 0) {
-            _.each(data, function(result) {
-              entities.push({
-                'guid': result.obj.guid,
-                'label': result.obj.label,
-                'entity_type': result.obj.entityType,
-                'entity_type_id': result.obj.entityTypeId,
-                'url': result.obj.url,
-                'last_modified': result.obj.lastModified,
-                'location': result.obj.loc
-              });
-            });
-          }
+router.get('/locations/thesplit', function(req, res) {
+    
+    var geoJson = { type: 'Point', coordinates: [-85.3514422, 35.0274214] };
+    var mileRadius = 2;
 
-          res.json({ 'meta': meta, 'geo_entities': entities });
-        }
-      });
-})
+    tdotController.getGeoEntities(geoJson, mileRadius, req.query, function(results) {
+      res.json(results);
+    });
+});
 
 module.exports = router;
