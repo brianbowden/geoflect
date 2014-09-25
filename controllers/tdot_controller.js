@@ -233,7 +233,7 @@ if (require.main === module) {
 var getGeoEntities = function(geoJson, mileRadius, queryParams, callback) {
 
   if (!isNaN(queryParams.typeId)) {
-    queryParams.entityTypeId = Number(req.query.typeId);
+    queryParams.entityTypeId = Number(queryParams.typeId);
   }
 
   GeoEntity.geoNear(
