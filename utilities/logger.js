@@ -12,7 +12,7 @@ var client = loggly.createClient({
 
 var log = function(logEntry, tag) {
   debugger;
-  client.log(logEntry, [tag]);
+  client.log(logEntry, [tag, process.env.GEOFLECT_TAG]);
   console.log(logEntry);
 };
 
