@@ -14,6 +14,11 @@ router.get('/cameras', function(req, res) {
     });
 });
 
+router.get('/cameras/:guid', function(req, res) {
+    tdotController.getCamera(req.params.guid, function(results) {
+      res.json(results);
+    });
+});
 
 router.get('/locations/chattanooga', function(req, res) {
     

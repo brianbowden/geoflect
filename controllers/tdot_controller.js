@@ -329,6 +329,22 @@ var getAllCameras = function(callback) {
     }
   });
 }
+var getCamera = function(guid, callback) {
+
+  GeoEntity.find({ 'guid': guid }, function (err, data) {
+    if (err) {
+      console.error(err);
+      callback({error: err});
+
+    } else {
+      var entities = getFormattedData(data);
+      var meta = {};
+      meta.returned_at = new Moment().format();
+
+      callback({ 'meta': meta, 'geo_entities': entities });
+    }
+  });
+}
 
 var addHistorySnapshot = function(guid, currTime, snapshot) {
   GeoEntity.update(
@@ -350,6 +366,7 @@ module.exports = {
   'wipeAllGeoEntities': wipeAllGeoEntities,
   'getGeoEntities': getGeoEntities,
   'getAllCameras': getAllCameras,
-  'addHistorySnapshot': addHistorySnapshot
+  'getCamera': getCamera,
+  'addHistorySnapshot': addHistorySnapshot,
 }
 
