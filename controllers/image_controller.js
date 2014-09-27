@@ -17,7 +17,7 @@ AWS.config.update({
 function processImage(source, currTime, callback) {
   var key = utils.formatGuidForUrl(source.guid + currTime) + '.jpg';
   
-  var filepath = path.resolve('../tmp/' + key);
+  var filepath = path.resolve('tmp/' + key);
 
   var tmpFile = fs.createWriteStream(filepath);
   http.get(source.url, function (res) {
