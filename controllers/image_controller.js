@@ -6,7 +6,7 @@ var logger = require('../utilities/logger');
 var tdotController = require('./tdot_controller');
 var Moment = require('moment');
 var AWS = require('aws-sdk');
-var utils = require('../utilities/utils')
+var utils = require('../utilities/utils');
 
 AWS.config.update({
   accessKeyId: process.env.GEOFLECT_S3_KEY_ID,
@@ -87,7 +87,7 @@ var downloadCameraImages = function(callback) {
       });
 
       processImageList(sources, function() {
-        console.log("Images processed");
+        logger.log("Images processed", 'downloadCameraImages');
       }, currTime);
 
       console.log(data);
