@@ -297,14 +297,14 @@ var getGeoEntities = function(geoJson, mileRadius, queryParams, callback) {
 
       } else {
 
+        var entities = getFormattedData(data);
+
         var meta = {};
         meta.returned_at = new Moment().format();
         meta.result_count = entities ? entities.length : 0;
         meta.query_geo_json = geoJson;
         meta.query_mile_radius = mileRadius;
         meta.query_params = queryParams;
-
-        var entities = getFormattedData(data);
 
         callback({ 'meta': meta, 'geo_entities': entities });
       }
