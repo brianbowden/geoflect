@@ -8,6 +8,13 @@ var _ = require('underscore');
 
 //mongoose.connect(process.env.GEOFLECT_MONGO_DB);
 
+router.get('/cameras', function(req, res) {
+    tdotController.getAllCameras(function(results) {
+      res.json(results);
+    });
+});
+
+
 router.get('/locations/chattanooga', function(req, res) {
     
     var geoJson = { type: 'Point', coordinates: [-85.2386909, 35.0982955] };

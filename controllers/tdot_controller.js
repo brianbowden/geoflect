@@ -4,6 +4,7 @@ var GeoEntity = require('../models/geo_entity');
 var logger = require('../utilities/logger');
 var Moment = require('moment');
 var http = require('http');
+var utils = require('../utilities/utils');
 var xml2js = require('xml2js'),
     parser = xml2js.Parser();
 
@@ -69,7 +70,7 @@ function syncData(entitySource, currTime, callback) {
 
             if (entitySource.type === 'atom') {
               geoEntity = {
-                guid: entity.id[0],
+                guid: utils.formatGuidForUrl(entity.id[0]),
                 loc: { 'type': 'Point', 'coordinates': [lat, lng]},
                 label: entity.summary[0],
                 entityType: entitySource.name,
@@ -79,7 +80,7 @@ function syncData(entitySource, currTime, callback) {
 
             } else if (entitySource.type === 'rss2') {
               geoEntity = {
-                guid: entity.guid[0]._,
+                guid: utils.formatGuidForUrl(entity.guid[0]._),
                 loc: { 'type': 'Point', 'coordinates': [lat, lng]},
                 label: entity.title[0],
                 entityType: entitySource.name,
@@ -99,7 +100,7 @@ function syncData(entitySource, currTime, callback) {
               geoEntity.data = entity.AverageSpeed;
             }
 
-            GeoEntity.findOneAndUpdate({ id: geoEntity.guid }, geoEntity, { upsert: true }, function (err, geoDoc) {
+            GeoEntity.findOneAndUpdate({ 'guid': geoEntity.guid }, geoEntity, { upsert: true }, function (err, geoDoc) {
               if (err) {
                 console.error(err);
                 failedInsertCount++;
@@ -158,7 +159,44 @@ function syncSourceList(sources, callback, currTime, current, totalEntities) {
   });
 }
 
-var syncMultiData = function(sources, callback) {
+function getFormattedData(data) {
+  
+  var entities = [];
+
+  if (data && data.length > 0) {
+    _.each(data, function(result) {
+
+      var item = result.obj ? result.obj : result;
+
+      var entity = {
+        'guid': item.guid,
+        'label': item.label,
+        'entity_type': item.entityType,
+        'entity_type_id': item.entityTypeId,
+        'url': item.url,
+        'last_modified': item.lastModified,
+        'location': item.loc
+      };
+
+      if (item.history && item.history.length > 0) {
+        entity.history = [];
+        _.each(item.history, function(historyItem) {
+          entity.history.push(
+            {
+              'timestamp': historyItem.timestamp, 
+              'snapshot': 'http://geoflectcamerahistory.s3.amazonaws.com/' + historyItem.snapshot
+            });
+        });
+      }
+
+      entities.push(entity);
+    });
+  }
+
+  return entities;
+}
+
+var syncMultiData = function(sources, wipeOldData, callback) {
 
   var currTime = new Moment().format();
 
@@ -170,10 +208,14 @@ var syncMultiData = function(sources, callback) {
       typeIdQuery.push({'entityTypeId': source.entityTypeId});
     });
 
-    GeoEntity.remove({ lastModified: { $lt: currTime }, entityTypeId: { $or: typeIdQuery } }, 
-      function (err) {
-        callback(totalEntities);
-      });
+    if (wipeOldData) {
+      GeoEntity.remove({ lastModified: { $lt: currTime }, entityTypeId: { $or: typeIdQuery } }, 
+        function (err) {
+          callback(totalEntities);
+        });
+    } else {
+      callback(totalEntities);
+    }
 
   }, currTime);
 }
@@ -191,7 +233,7 @@ var syncAllData = function(callback) {
     TDOT_PATH_MEMPHIS_SPEED
   ];
 
-  syncMultiData(sources, callback);
+  syncMultiData(sources, true, callback);
 }
 
 var syncEventData = function(callback) {
@@ -205,7 +247,7 @@ var syncEventData = function(callback) {
     TDOT_PATH_MEMPHIS_SPEED
   ];
 
-  syncMultiData(sources, function(totalEntities) {
+  syncMultiData(sources, true, function(totalEntities) {
     logger.log("Updated " + totalEntities.length + " event records", "eventupdate");
     callback(totalEntities);
   });
@@ -217,7 +259,7 @@ var syncFixedPointData = function(callback) {
     TDOT_PATH_MESSAGES
   ];
 
-  syncMultiData(sources, function(totalEntities) {
+  syncMultiData(sources, false, function(totalEntities) {
     logger.log("Updated " + totalEntities.length + " fixed point records", "fixedpointupdate");
     callback(totalEntities);
   });
@@ -250,27 +292,47 @@ var getGeoEntities = function(geoJson, mileRadius, queryParams, callback) {
 
         var meta = {};
         meta.returned_at = new Moment().format();
+        meta.result_count = entities ? entities.length : 0;
         meta.query_geo_json = geoJson;
         meta.query_mile_radius = mileRadius;
         meta.query_params = queryParams;
 
-        var entities = [];
-
-        if (data && data.length > 0) {
-          _.each(data, function(result) {
-            entities.push({
-              'guid': result.obj.guid,
-              'label': result.obj.label,
-              'entity_type': result.obj.entityType,
-              'entity_type_id': result.obj.entityTypeId,
-              'url': result.obj.url,
-              'last_modified': result.obj.lastModified,
-              'location': result.obj.loc
-            });
-          });
-        }
+        var entities = getFormattedData(data);
 
         callback({ 'meta': meta, 'geo_entities': entities });
+      }
+    });
+}
+
+var getAllCameras = function(callback) {
+  GeoEntity.find({ entityTypeId: 0 }, { history: { $slice: -10 } }, function (err, data) {
+    if (err) {
+      console.error(err);
+      callback({error: err});
+
+    } else {
+      var entities = getFormattedData(data);
+
+      var meta = {};
+      meta.returned_at = new Moment().format();
+      meta.query_params = { entityTypeId: 0 };
+      meta.result_count = entities ? entities.length : 0;
+
+      callback({ 'meta': meta, 'geo_entities': entities });
+    }
+  });
+}
+
+var addHistorySnapshot = function(guid, currTime, snapshot) {
+  GeoEntity.update(
+    {'guid': guid}, 
+    { $pushAll: { 'history': [{ 'timestamp': currTime, 'snapshot': snapshot }] } }, 
+    { upsert: true },
+    function(err) {
+      if (err) {
+        logger.log({error: err}, 'addHistorySnapshot');
+      } else {
+        logger.log("Adding snapshot for " + guid, 'addHistorySnapshot');
       }
     });
 }
@@ -278,6 +340,8 @@ var getGeoEntities = function(geoJson, mileRadius, queryParams, callback) {
 module.exports = {
   'syncEventData': syncEventData,
   'syncFixedPointData': syncFixedPointData,
-  'getGeoEntities': getGeoEntities
+  'getGeoEntities': getGeoEntities,
+  'getAllCameras': getAllCameras,
+  'addHistorySnapshot': addHistorySnapshot
 }
 

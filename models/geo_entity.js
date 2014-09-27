@@ -3,11 +3,12 @@ var Schema = mongoose.Schema;
 
 var GeoEntitySchema = new Schema({
   guid: String,
-  loc: { "type": {type: String} , "coordinates": Array },
+  loc: { "type": { type: String } , "coordinates": Array },
   entityType: String,
   entityTypeId: Number,
   label: String,
   data: String,
+  history: [ { timestamp: Date, snapshot: String } ],
   url: String,
   lastModified: Date
 });
