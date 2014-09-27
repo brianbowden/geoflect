@@ -1,5 +1,5 @@
 var tdotController = require('../controllers/tdot_controller');
-var imageController = reuqire('../controllers/image_controller')
+var imageController = require('../controllers/image_controller');
 
 var startScheduledTasks = function() {
   
