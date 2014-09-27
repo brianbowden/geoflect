@@ -265,6 +265,13 @@ var syncFixedPointData = function(callback) {
   });
 }
 
+var wipeAllGeoEntities = function(callback) {
+  GeoEntity.find({}).remove(function() {
+    logger.log("Wiped all GeoEntity data", 'wipeData');
+    callback();
+  });
+}
+
 if (require.main === module) {
   // Command line
   syncFixedPointData(function(totalEntities) {
@@ -340,6 +347,7 @@ var addHistorySnapshot = function(guid, currTime, snapshot) {
 module.exports = {
   'syncEventData': syncEventData,
   'syncFixedPointData': syncFixedPointData,
+  'wipeAllGeoEntities': wipeAllGeoEntities,
   'getGeoEntities': getGeoEntities,
   'getAllCameras': getAllCameras,
   'addHistorySnapshot': addHistorySnapshot
