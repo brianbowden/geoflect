@@ -99,4 +99,4 @@ if (require.main === module) {
   downloadCameraImages(function() {});
 }
 
-module.exports = { }
+module.exports = { 'downloadCameraImages': downloadCameraImages }
