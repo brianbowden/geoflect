@@ -89,8 +89,6 @@ var downloadCameraImages = function(callback) {
       processImageList(sources, function() {
         logger.log("Images processed", 'downloadCameraImages');
       }, currTime);
-
-      console.log(data);
     }
   });
 }

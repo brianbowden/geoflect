@@ -339,7 +339,7 @@ var addHistorySnapshot = function(guid, currTime, snapshot) {
       if (err) {
         logger.log({error: err}, 'addHistorySnapshot');
       } else {
-        logger.log("Adding snapshot for " + guid, 'addHistorySnapshot');
+        //logger.log("Adding snapshot for " + guid, 'addHistorySnapshot');
       }
     });
 }
