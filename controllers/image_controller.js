@@ -4,6 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var logger = require('../utilities/logger');
 var tdotController = require('./tdot_controller');
+var mongoose = require('mongoose');
 var Moment = require('moment');
 var AWS = require('aws-sdk');
 var utils = require('../utilities/utils');
