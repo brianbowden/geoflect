@@ -14,7 +14,7 @@ var app = express();
 
 var mongoOptions = { server: {}, replset: {} };
 mongoOptions.server.socketOptions = mongoOptions.replset.socketOptions = { keepAlive: 1 };
-mongoose.connect(GEOFLECT_MONGO_DB, mongoOptions);
+mongoose.connect(process.env.GEOFLECT_MONGO_DB, mongoOptions);
 
 loggly.log("Starting Geoflect server", "serverstart");
 
