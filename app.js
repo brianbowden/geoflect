@@ -12,7 +12,7 @@ var apiRoutes = require('./routes/api');
 
 var app = express();
 
-var mongoOptions = { server: {} };
+var mongoOptions = { server: {}, replset: {} };
 mongoOptions.server.socketOptions = mongoOptions.replset.socketOptions = { keepAlive: 1 };
 mongoose.connect(GEOFLECT_MONGO_DB, mongoOptions);
 
