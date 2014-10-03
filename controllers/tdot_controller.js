@@ -1,5 +1,4 @@
 var _ = require('underscore');
-var mongoose = require('mongoose');
 var GeoEntity = require('../models/geo_entity');
 var logger = require('../utilities/logger');
 var Moment = require('moment');
@@ -19,8 +18,6 @@ const TDOT_PATH_COUNTYWIDE_WEATHER = { id: 5, name: 'Countywide Weather Advisory
 const TDOT_PATH_NASH_SPEED = { id: 6, name: 'Nashville Average Speed', path: '/tsw/GeoRSS/TDOTNashSpeedGeorss.xml', type: 'rss2' };
 const TDOT_PATH_KNOX_SPEED = { id: 7, name: 'Knoxville Average Speed', path: '/tsw/GeoRSS/TDOTKnoxSpeedGeorss.xml', type: 'rss2' };
 const TDOT_PATH_MEMPHIS_SPEED = { id: 8, name: 'Memphis Average Speed', path: '/tsw/GeoRSS/TDOTMempSpeedGeorss.xml', type: 'rss2' };
-
-mongoose.connect(process.env.GEOFLECT_MONGO_DB);
 
 function syncData(entitySource, currTime, callback) {
 

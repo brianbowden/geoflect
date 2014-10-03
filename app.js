@@ -6,12 +6,15 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var taskScheduler = require('./utilities/task_scheduler');
 var loggly = require('./utilities/logger');
-
+var mongoose = require('mongoose');
 
 var apiRoutes = require('./routes/api');
 
 var app = express();
 
+var mongoOptions = {};
+mongoOptions.server.socketOptions = mongoOptions.replset.socketOptions = { keepAlive: 1 };
+mongoose.connect(GEOFLECT_MONGO_DB, mongoOptions);
 
 loggly.log("Starting Geoflect server", "serverstart");
 

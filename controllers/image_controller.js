@@ -4,12 +4,9 @@ var fs = require('fs');
 var path = require('path');
 var logger = require('../utilities/logger');
 var tdotController = require('./tdot_controller');
-var mongoose = require('mongoose');
 var Moment = require('moment');
 var AWS = require('aws-sdk');
 var utils = require('../utilities/utils');
-
-mongoose.connect(process.env.GEOFLECT_MONGO_DB);
 
 AWS.config.update({
   accessKeyId: process.env.GEOFLECT_S3_KEY_ID,
