@@ -2,7 +2,7 @@ var mongoose = require('mongoose')
 var Schema = mongoose.Schema;
 
 var GeoEntitySchema = new Schema({
-  guid: String,
+  guid: { type: String, index: true },
   loc: { "type": { type: String } , "coordinates": Array },
   entityType: String,
   entityTypeId: Number,
