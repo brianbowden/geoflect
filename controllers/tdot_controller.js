@@ -42,6 +42,7 @@ function syncData(entitySource, currTime, callback) {
     })
 
     res.on('end', function () {
+
       parser.parseString(xml, function (err, data) {
         if (!err) {
 
