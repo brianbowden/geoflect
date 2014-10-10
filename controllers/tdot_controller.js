@@ -45,19 +45,25 @@ function syncData(entitySource, currTime, callback) {
       parser.parseString(xml, function (err, data) {
         if (!err) {
 
-          if (entitySource.type === 'atom') {
+          if (entitySource.type === 'atom' && data && data.feed) {
             entityArray = data.feed.entry;
-          } else if (entitySource.type === 'rss2') {
+          } else if (entitySource.type === 'rss2' && data && data.rss 
+            && data.rss.channel && data.rss.channel.length > 0) {
             entityArray = data.rss.channel[0].item;
           }
 
-          if (!!!entityArray) {
+          if (!!!entityArray || entityArray.length === 0) {
             callback({});
             return;
           }
 
           for (var i = 0; i < entityArray.length; i++) {
             var entity = entityArray[i];
+
+            if (!entity || !entity.marker || entity.marker.length < 2) {
+              callback({});
+              return;
+            }
 
             var point = entity.marker[0].split(' ');
             var lng = parseFloat(point[0]);
@@ -278,7 +284,7 @@ if (require.main === module) {
 
 var getGeoEntities = function(geoJson, mileRadius, queryParams, callback) {
 
-  var query = {};
+  var query = { history: { $slice: -2 } };
 
   if (!isNaN(queryParams.typeId)) {
     query.entityTypeId = Number(queryParams.typeId);
@@ -328,7 +334,7 @@ var getAllCameras = function(callback) {
 }
 var getCamera = function(guid, callback) {
 
-  GeoEntity.find({ 'guid': guid }, function (err, data) {
+  GeoEntity.find({ 'guid': guid }, { history: { $slice: -20 } }, function (err, data) {
     if (err) {
       console.error(err);
       callback({error: err});
